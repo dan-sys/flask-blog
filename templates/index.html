@@ -1,18 +1,24 @@
-<h1>Hello Worm</h1>
 
+{% extends 'base.html' %}
 
+{% block content %}
+    <h1>Hello Worm</h1>
+    
+    
+    
+    <p>Start of something</p>
+    <p>My name is {{ first_name }}</p>
+    <p>{{ stuff|striptags }}</p>
+    
+    <h3> Favorite Piazza : </h3>
+    
+    {% for topping in fav_piazza %}
+        {% if topping is string  %}
+            {{ topping }}<br/>
+        {% endif %}
+    {% endfor %}
+    
+    <br><br/>
+    {{ fav_piazza.3+95 }}
 
-<p>Start of something</p>
-<p>My name is {{ first_name }}</p>
-<p>{{ stuff|striptags }}</p>
-
-<h3> Favorite Piazza : </h3>
-
-{% for topping in fav_piazza %}
-    {% if topping is string  %}
-        {{ topping }}<br/>
-    {% endif %}
-{% endfor %}
-
-<br><br/>
-{{ fav_piazza.3+95 }}
+{% endblock %}
