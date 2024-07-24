@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, flash
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
@@ -40,14 +40,19 @@ def user(name):
 @app.route('/name',methods=['GET','POST'])
 
 def name():
+
     name = None
     form = UserForm()
     # validate form
     if form.validate_on_submit():
         name = form.name.data
         form.name.data = ''
+        #create flash message
+        flash("Form submitted Successfully. Congrats")
 
-    return render_template("name.html",name=name,form=form)
+    return render_template("name.html",
+                           name=name,
+                           form=form)
 
 
 # create custom error pages
