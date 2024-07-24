@@ -12,6 +12,11 @@
 {% endfor %}
 {% if name %}
     <h2>Howdy {{ name }}</h2>
+    <br/>
+    <img src="{{ url_for('static',filename='images/ai_Painting_Carvaggio.jpg')}}", width="device-width">
+    <br/>
+    <p id="dynpart">This is an image that doesnt exist</p>
+    <script> src="{{ url_for('static',filename='js/myfile.js')}}"</script>
 {% else %}
     <h2>What's your name?</h2>
     <br/>
