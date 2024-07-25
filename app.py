@@ -1,4 +1,4 @@
-from flask import Flask, render_template, flash
+from flask import Flask, render_template, flash, request
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
@@ -43,6 +43,11 @@ class UserForm(FlaskForm):
     email = StringField("Email Address", validators=[DataRequired()])
     submit = SubmitField("Submit")
 
+class UserUpdateForm(FlaskForm):
+    previous_name = StringField("Previous Name", validators=[DataRequired()])
+    new_name = StringField("New Name", validators=[DataRequired()])
+    #email = StringField("Email Address", validators=[DataRequired()])
+    submit = SubmitField("Submit")
 
 #create a route decorator
 @app.route('/')
@@ -87,8 +92,33 @@ def add_user():
                            name=name, 
                            list_users=list_users)
 
+# update a database record
+@app.route('/update/<int:id>', methods=['GET','POST'])
+
+def update_user(id):
+    form = UserUpdateForm()
+
+    name_to_update = Users.query.get_or_404(id)
+
+    if request.method == 'POST':
+        name_to_update.name = request.form['new_name']
+        try:
+            db.session.commit()
+            flash("User information updated successfully!!!")
+            return render_template("update.html",
+                                   form=form,
+                                   name_to_update=name_to_update)
+        except:
+            flash("Something went wrong, its not your fault, its MINE!!!")
+            return render_template("update.html",
+                                   form=form,
+                                   name_to_update=name_to_update)
+    else:
+        return render_template("update.html",
+                                   form=form,
+                                   name_to_update=name_to_update)
 #create namepage
-#this is to be deleted
+#this is to be deleted later
 @app.route('/name',methods=['GET','POST'])
 
 def name():
