@@ -5,7 +5,8 @@ from wtforms.validators import DataRequired
 import configparser
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-
+import psycopg2
+from sqlalchemy_utils import database_exists, create_database
 
 
 config = configparser.ConfigParser()
@@ -15,7 +16,8 @@ config.read('secretKey.ini')
 app = Flask(__name__)
 
 # add Database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db' 
+app.config['SQLALCHEMY_DATABASE_URI'] = config['DEFAULT']['DB_URL']
 #add secret key for csrf
 app.config['SECRET_KEY'] = config['DEFAULT']['SecretKey']
 
@@ -118,7 +120,16 @@ def page_not_found(err):
 def page_not_found(err):
     return render_template("500.html"),500
 
+@app.cli.command('createdb')
+def createdb_command():
+    """Creates the database + tables."""
 
+    if not database_exists(config['DEFAULT']['DB_URL']):
+        print('Creating database.')
+        create_database(config['DEFAULT']['DB_URL'])
+    print('Creating tables.')
+    db.create_all()
+    print('Tables created!')
 
 
 
@@ -189,12 +200,6 @@ def page_not_found(err):
 
 
 
-
-
-
-
-
-
-
-
-
+if __name__ == "__main__":
+    app.debug = True
+    app.run()
