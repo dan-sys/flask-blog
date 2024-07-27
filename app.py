@@ -114,16 +114,44 @@ def update_user(id):
             flash("User information updated successfully!!!")
             return render_template("update.html",
                                    form=form,
-                                   name_to_update=name_to_update)
+                                   name_to_update=name_to_update,
+                                   id=id)
         except:
             flash("Something went wrong, its not your fault, its MINE!!!")
             return render_template("update.html",
                                    form=form,
-                                   name_to_update=name_to_update)
+                                   name_to_update=name_to_update,
+                                   id=id)
     else:
         return render_template("update.html",
                                    form=form,
-                                   name_to_update=name_to_update)
+                                   name_to_update=name_to_update,
+                                   id=id)
+    
+@app.route('/delete/<int:id>')
+
+def delete_user(id):
+    user_to_delete = Users.query.get_or_404(id)
+    name = None
+    form = UserForm()
+    try:
+        db.session.delete(user_to_delete)
+        db.session.commit()
+        flash("User Deleted Successfully")
+
+        list_users = Users.query.order_by(Users.date_added)
+        return render_template("add_user.html",
+                               form=form,
+                               name=name,
+                               list_users=list_users)
+    except:
+        flash("Wooah User refused to be deleted Successfully")
+        return render_template("add_user.html",
+                               form=form,
+                               name=name,
+                               list_users=list_users)
+
+
 #create namepage
 #this is to be deleted later
 @app.route('/name',methods=['GET','POST'])
