@@ -11,6 +11,8 @@ from sqlalchemy_utils import database_exists, create_database
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
+
+
 config = configparser.ConfigParser()
 config.read('secretKey.ini')
 
@@ -64,6 +66,14 @@ class UserForm(FlaskForm):
     favorite_color = StringField("Favorite Color")
     password_hash = PasswordField('Password', validators=[DataRequired(),EqualTo('password_hash2',message='Passwords must match')])
     password_hash2 = PasswordField('Confirm Password', validators=[DataRequired()])
+    submit = SubmitField("Submit")
+
+
+class PasswordForm(FlaskForm):
+
+    email = StringField("Email Address", validators=[DataRequired()])
+    password_hash = PasswordField('Enter your Password', validators=[DataRequired()])
+
     submit = SubmitField("Submit")
 
 class UserUpdateForm(FlaskForm):
@@ -169,6 +179,39 @@ def delete_user(id):
                                form=form,
                                name=name,
                                list_users=list_users)
+
+
+@app.route('/test_pw',methods=['GET','POST'])
+
+def test_pw():
+
+    email = None
+    password = None
+    pw_to_check = None
+    passed = None
+    form = PasswordForm()
+
+    # validate form
+    if form.validate_on_submit():
+        email = form.email.data
+        password= form.password_hash.data
+        #clear the form
+        form.email.data = ''
+        form.password_hash = ''
+
+        #look up users by email address
+        pw_to_check = Users.query.filter_by(email=email).first()
+
+        #check hashed passwords
+        passed = check_password_hash(pw_to_check.password_hash, password)
+
+
+    return render_template("test_pw.html",
+                           email=email,
+                           password=password,
+                           pw_to_check=pw_to_check,
+                           passed=passed,
+                           form=form)
 
 
 #create namepage
