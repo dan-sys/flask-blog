@@ -2,6 +2,7 @@ from flask import Flask, render_template, flash, request
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, PasswordField, BooleanField, ValidationError
 from wtforms.validators import DataRequired, EqualTo, Length
+from wtforms.widgets import TextArea
 import configparser
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -58,6 +59,28 @@ class Users(db.Model):
         return '<Name %r>' % self.name
 
 
+#create a blog post model
+class BlogPosts(db.Model):
+     
+     id = db.Column(db.Integer,primary_key=True)
+     title = db.Column(db.String(250))
+     content = db.Column(db.Text)
+     author = db.Column(db.String(250))
+     date_posted = db.Column(db.DateTime, default=datetime.now())
+     slug = db.Column(db.String(250))
+
+# create a BlogPosts Form
+
+class BlogPostsForm(FlaskForm):
+    title = StringField("Title", validators=[DataRequired()])
+    content = StringField("Content", validators=[DataRequired()], widget=TextArea())
+    author = StringField("Author", validators=[DataRequired()])
+    slug = StringField("Slug", validators=[DataRequired()])
+    submit = SubmitField("Submit")
+
+
+
+
 # Create a Form Class
 
 class UserForm(FlaskForm):
@@ -67,6 +90,7 @@ class UserForm(FlaskForm):
     password_hash = PasswordField('Password', validators=[DataRequired(),EqualTo('password_hash2',message='Passwords must match')])
     password_hash2 = PasswordField('Confirm Password', validators=[DataRequired()])
     submit = SubmitField("Submit")
+
 
 
 class PasswordForm(FlaskForm):
@@ -212,6 +236,40 @@ def test_pw():
                            pw_to_check=pw_to_check,
                            passed=passed,
                            form=form)
+
+# Add a blogpost page
+@app.route('/add-post',methods=['GET','POST'])
+
+def add_post():
+    form = BlogPostsForm()
+
+    if form.validate_on_submit():
+        post = BlogPosts(title=form.title.data, content=form.content.data, author=form.author.data, slug=form.slug.data)
+        form.title.data = ''
+        form.content.data = ''
+        form.author.data = ''
+        form.slug.data = ''
+
+        #add data to database table
+        db.session.add(post)
+        db.session.commit()
+        flash("Blog Post submitted successfully!!!")
+    # redirected to webpage
+    return render_template("add_blogpost.html",
+                           form=form)
+
+@app.route('/posts')
+def show_posts():
+    # query db to get blog posts from Database table
+    #we are quering the model -- note this
+    posts = BlogPosts.query.order_by(BlogPosts.date_posted)
+    return render_template("posts.html",
+                           posts=posts)
+
+@app.route('/posts/<int:id>')
+def show_single_post(id):
+    post = BlogPosts.query.get_or_404(id)
+    return render_template('single_post.html',post=post)
 
 # to return JSON
 #@app.route('/api')
