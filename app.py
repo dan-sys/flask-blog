@@ -213,6 +213,14 @@ def test_pw():
                            passed=passed,
                            form=form)
 
+# to return JSON
+#@app.route('/api')
+#def get_sampleJSON():
+#    #just prepare a dictionary and flask will jsonify it
+#    return {"id": 568459,
+#            "user": "User Primo",
+#            }
+
 
 #create namepage
 #this is to be deleted later
