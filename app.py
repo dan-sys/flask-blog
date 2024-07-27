@@ -257,6 +257,13 @@ def add_post():
     # redirected to webpage
     return render_template("add_blogpost.html",
                            form=form)
+
+@app.route('/posts')
+def show_posts():
+
+    return render_template("posts.html")
+
+
 # to return JSON
 #@app.route('/api')
 #def get_sampleJSON():
