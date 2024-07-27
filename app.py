@@ -260,9 +260,16 @@ def add_post():
 
 @app.route('/posts')
 def show_posts():
+    # query db to get blog posts from Database table
+    #we are quering the model -- note this
+    posts = BlogPosts.query.order_by(BlogPosts.date_posted)
+    return render_template("posts.html",
+                           posts=posts)
 
-    return render_template("posts.html")
-
+@app.route('/posts/<int:id>')
+def show_single_post(id):
+    post = BlogPosts.query.get_or_404(id)
+    return render_template('single_post.html',post=post)
 
 # to return JSON
 #@app.route('/api')
