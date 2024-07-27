@@ -8,6 +8,7 @@ from flask_migrate import Migrate
 from datetime import datetime
 import psycopg2
 from sqlalchemy_utils import database_exists, create_database
+from werkzeug.security import generate_password_hash, check_password_hash
 
 
 config = configparser.ConfigParser()
@@ -35,6 +36,20 @@ class Users(db.Model):
     email = db.Column(db.String(100),nullable=False, unique=True)
     favorite_color = db.Column(db.String(50))
     date_added = db.Column(db.DateTime, default=datetime.now())
+    # do some password work
+    password_hash = db.Column(db.String(128))
+    #create a property for the passwords
+    @property
+    def user_password(self):
+        raise AttributeError('Password is not a readable atrribute!!!')
+    
+    @user_password.setter
+    def user_password(self, user_password):
+        self.password_hash = generate_password_hash(user_password)
+
+    def verify_password(self, user_password):
+        return check_password_hash(self.password_hash, user_password)
+    
 
     #create a string
     def __repr__(self):
@@ -266,5 +281,4 @@ def createdb_command():
 
 
 if __name__ == "__main__":
-    app.debug = True
-    app.run()
+    app.run(debug = False)
