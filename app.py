@@ -1,13 +1,16 @@
 from flask import Flask, render_template, flash, request
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
-from wtforms.validators import DataRequired
+from wtforms import StringField, SubmitField, PasswordField, BooleanField, ValidationError
+from wtforms.validators import DataRequired, EqualTo, Length
 import configparser
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from datetime import datetime
 import psycopg2
 from sqlalchemy_utils import database_exists, create_database
+from werkzeug.security import generate_password_hash, check_password_hash
+
+
 
 
 config = configparser.ConfigParser()
@@ -35,6 +38,20 @@ class Users(db.Model):
     email = db.Column(db.String(100),nullable=False, unique=True)
     favorite_color = db.Column(db.String(50))
     date_added = db.Column(db.DateTime, default=datetime.now())
+    # password hash in db
+    password_hash = db.Column(db.String(500))
+    #create a property for the passwords
+    @property
+    def user_password(self):
+        raise AttributeError('Password is not a readable atrribute!!!')
+    
+    @user_password.setter
+    def user_password(self, user_password):
+        self.password_hash = generate_password_hash(user_password)
+
+    def verify_password(self, user_password):
+        return check_password_hash(self.password_hash, user_password)
+    
 
     #create a string
     def __repr__(self):
@@ -47,6 +64,16 @@ class UserForm(FlaskForm):
     name = StringField("Name", validators=[DataRequired()])
     email = StringField("Email Address", validators=[DataRequired()])
     favorite_color = StringField("Favorite Color")
+    password_hash = PasswordField('Password', validators=[DataRequired(),EqualTo('password_hash2',message='Passwords must match')])
+    password_hash2 = PasswordField('Confirm Password', validators=[DataRequired()])
+    submit = SubmitField("Submit")
+
+
+class PasswordForm(FlaskForm):
+
+    email = StringField("Email Address", validators=[DataRequired()])
+    password_hash = PasswordField('Enter your Password', validators=[DataRequired()])
+
     submit = SubmitField("Submit")
 
 class UserUpdateForm(FlaskForm):
@@ -83,14 +110,16 @@ def add_user():
     if form.validate_on_submit():
         user = Users.query.filter_by(email=form.email.data).first()
         if user is None:
-            user = Users(name=form.name.data,email=form.email.data,favorite_color=form.favorite_color.data)
+            # hash password before passing it to db
+            hash_pw = generate_password_hash(form.password_hash.data, method='scrypt')
+            user = Users(name=form.name.data,email=form.email.data,favorite_color=form.favorite_color.data, password_hash=hash_pw)
             db.session.add(user)
             db.session.commit()
         name = form.name.data
-        email = form.email.data
         form.name.data = ''
         form.email.data = ''
         form.favorite_color.data = ''
+        form.password_hash = ''
         #create flash message
         flash("User added Successfully. Congrats")
     list_users = Users.query.order_by(Users.date_added)
@@ -150,6 +179,39 @@ def delete_user(id):
                                form=form,
                                name=name,
                                list_users=list_users)
+
+
+@app.route('/test_pw',methods=['GET','POST'])
+
+def test_pw():
+
+    email = None
+    password = None
+    pw_to_check = None
+    passed = None
+    form = PasswordForm()
+
+    # validate form
+    if form.validate_on_submit():
+        email = form.email.data
+        password= form.password_hash.data
+        #clear the form
+        form.email.data = ''
+        form.password_hash = ''
+
+        #look up users by email address
+        pw_to_check = Users.query.filter_by(email=email).first()
+
+        #check hashed passwords
+        passed = check_password_hash(pw_to_check.password_hash, password)
+
+
+    return render_template("test_pw.html",
+                           email=email,
+                           password=password,
+                           pw_to_check=pw_to_check,
+                           passed=passed,
+                           form=form)
 
 
 #create namepage
@@ -266,5 +328,4 @@ def createdb_command():
 
 
 if __name__ == "__main__":
-    app.debug = True
-    app.run()
+    app.run(debug = False)
