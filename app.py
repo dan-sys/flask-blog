@@ -33,7 +33,7 @@ migrate = Migrate(app,db)
 #set up login manager
 login_manager = LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = 'login'
+login_manager.login_view = 'login_fcn'
 
 
 # create the data model
@@ -136,6 +136,7 @@ def load_user(user_id):
 
 #create login fcn
 @app.route('/login',methods=['GET','POST'])
+
 def login_fcn():
     form = LoginForm()
 
@@ -156,11 +157,13 @@ def login_fcn():
 #create dashboard fcn
 @app.route('/dashboard',methods=['GET','POST'])
 @login_required
+
 def dashboard():
     return render_template('dashboard.html')
 
 @app.route('/logout',methods=['GET','POST'])
 @login_required
+
 def logout():
     logout_user()
     flash("You have been logged Out of here bro! Go and warm eba")

@@ -13,9 +13,21 @@
 
     <h2>User Dashboard Area </h2>
     <br/>
+    <div class="card">
+        <h5 class="card-header">User Dashboard</h5>
+        <div class="card-body">
+          <h5 class="card-title">These are your account details</h5>
+          <p class="card-text">
+            <strong>Name :</strong> {{ current_user.name }} <br/>
+            <strong>Username :</strong>  {{ current_user.username }} <br/>
+            <strong>UserId :</strong>  {{ current_user.id }} <br/>
+            <strong>Email Address :</strong>  {{ current_user.email }} <br/>
+            <strong>Date Joined :</strong>   {{ current_user.date_added }} <br/>
+          </p>
+          <a href="{{ url_for('logout')}}" class="btn btn-secondary btn-sm">Log out</a>
+        </div>
+    </div>
     <br/>
-    <p>You are logged in my friend</p>
+
     
-    <br/>
-    <a href="{{ url_for('logout')}}">Log out</a>
 {% endblock %}
