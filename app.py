@@ -159,7 +159,33 @@ def login_fcn():
 @login_required
 
 def dashboard():
-    return render_template('dashboard.html')
+    form = UserForm()
+    id = current_user.id
+    name_to_update = Users.query.get_or_404(id)
+
+    if request.method == 'POST':
+        name_to_update.name = request.form['name']
+        name_to_update.email = request.form['email']
+        name_to_update.username = request.form['username']
+        try:
+            db.session.commit()
+            flash("User information updated successfully!!!")
+            return render_template("dashboard.html",
+                                   form=form,
+                                   name_to_update=name_to_update,
+                                   id=id)
+        except:
+            flash("Something went wrong, its not your fault, its MINE!!!")
+            return render_template("dashboard.html",
+                                   form=form,
+                                   name_to_update=name_to_update,
+                                   id=id)
+    else:
+        return render_template("dashboard.html",
+                                   form=form,
+                                   name_to_update=name_to_update,
+                                   id=id)
+
 
 @app.route('/logout',methods=['GET','POST'])
 @login_required
@@ -207,12 +233,13 @@ def add_user():
 @app.route('/update/<int:id>', methods=['GET','POST'])
 
 def update_user(id):
-    form = UserUpdateForm()
-
+    form = UserForm()
     name_to_update = Users.query.get_or_404(id)
 
     if request.method == 'POST':
-        name_to_update.name = request.form['new_name']
+        name_to_update.name = request.form['name']
+        name_to_update.email = request.form['email']
+        name_to_update.username = request.form['username']
         try:
             db.session.commit()
             flash("User information updated successfully!!!")

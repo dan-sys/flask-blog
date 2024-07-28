@@ -10,45 +10,27 @@
     </div>
     
 {% endfor %}
-{% if name %}
-    <h2>User info updated </h2>
-    <br/>
-    <br/>
-    <br/>
-    <table class="table table-hover table-bordered table-striped">
-        {% for user in list_users %}
-        <tr>
-            <td>
-                {{ user.id }} - {{ user.name }} - {{ user.email }}
-            </td>
-        </tr>
-        
-    {% endfor %}
-    </table>
-   
-{% else %}
-    <h2> User List : </h2>
+
+    <h3> Update User details </h3>
     <br/>
     <div class="shadow p-3 mb-5 bg-body-tertiary rounded">
         <form action="/update/{{ name_to_update.id }}" method="POST">
             {{ form.hidden_tag() }}
-            {{ form.previous_name.label(class="form-label") }}
-            {{ form.previous_name(class="form-control", value=name_to_update.name) }}
-            {{ form.new_name.label(class="form-label") }}
-            {{ form.new_name(class="form-control") }}
+            {{ form.name.label(class="form-label") }}
+            {{ form.name(class="form-control",value=name_to_update.name) }}
+            {{ form.email.label(class="form-label") }}
+            {{ form.email(class="form-control",value=name_to_update.email) }}
+            {{ form.username.label(class="form-label") }}
+            {{ form.username(class="form-control",value=name_to_update.username) }}
             <br/>
             {{ form.submit(class="btn btn-primary") }}
             <a href="{{ url_for('delete_user',id=id)}}" class="btn btn-danger">Delete</a>
         </form>
-        <form method="POST">
-            
-        </form>
+        
     </div>
     
     <br/>
     <br/>
     
     
-{% endif %}
-
 {% endblock %}
