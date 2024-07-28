@@ -290,7 +290,7 @@ def test_pw():
 
 # Add a blogpost page
 @app.route('/add-post',methods=['GET','POST'])
-
+@login_required
 def add_post():
     form = BlogPostsForm()
 
@@ -324,6 +324,7 @@ def show_single_post(id):
 
 
 @app.route('/posts/edit/<int:id>',methods=['GET','POST'])
+@login_required
 def edit_post(id):
     post_to_edit = BlogPosts.query.get_or_404(id)
     form = BlogPostsForm()
@@ -348,6 +349,7 @@ def edit_post(id):
 
 
 @app.route('/posts/delete/<int:id>')
+@login_required
 def delete_post(id):
     post_to_delete = BlogPosts.query.get_or_404(id)
 
