@@ -1,4 +1,4 @@
-from flask import Flask, render_template, flash, request
+from flask import Flask, render_template, flash, request, redirect, url_for
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, PasswordField, BooleanField, ValidationError
 from wtforms.validators import DataRequired, EqualTo, Length
@@ -270,6 +270,50 @@ def show_posts():
 def show_single_post(id):
     post = BlogPosts.query.get_or_404(id)
     return render_template('single_post.html',post=post)
+
+
+@app.route('/posts/edit/<int:id>',methods=['GET','POST'])
+def edit_post(id):
+    post_to_edit = BlogPosts.query.get_or_404(id)
+    form = BlogPostsForm()
+
+    if form.validate_on_submit():
+        post_to_edit.title = form.title.data
+        post_to_edit.author = form.author.data
+        post_to_edit.slug = form.slug.data
+        post_to_edit.content = form.content.data
+
+        #update db with newly modified post
+        db.session.add(post_to_edit)
+        db.session.commit()
+        flash("Post has been updated")
+        return redirect(url_for('show_single_post',id=post_to_edit.id))
+
+    form.title.data = post_to_edit.title
+    form.author.data = post_to_edit.author
+    form.slug.data = post_to_edit.slug
+    form.content.data = post_to_edit.content
+    return render_template('edit_post.html',form=form)
+
+
+@app.route('/posts/delete/<int:id>')
+def delete_post(id):
+    post_to_delete = BlogPosts.query.get_or_404(id)
+
+    try:
+        db.session.delete(post_to_delete)
+        db.session.commit()
+        flash("Blog Post deleted successfully")
+        posts = BlogPosts.query.order_by(BlogPosts.date_posted)
+        return render_template("posts.html",
+                           posts=posts)
+    except:
+        flash("Problem occured when deleting Blog Post")
+        posts = BlogPosts.query.order_by(BlogPosts.date_posted)
+        return render_template("posts.html",
+                           posts=posts)
+
+
 
 # to return JSON
 #@app.route('/api')
