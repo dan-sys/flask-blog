@@ -3,7 +3,7 @@
 {% block content %}
 {% for message in get_flashed_messages() %}
 
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
         {{ message }}
     <!--  <span type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></span> -->
     <span type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></span>
@@ -11,26 +11,26 @@
     
 {% endfor %}
 
-    <h3> Update User details </h3>
+    <h2>Login Area </h2>
     <br/>
+    <br/>
+
     <div class="shadow p-3 mb-5 bg-body-tertiary rounded">
-        <form action="/update/{{ name_to_update.id }}" method="POST">
+        <form action="{{ url_for('login_fcn') }}" method="POST">
             {{ form.hidden_tag() }}
-            {{ form.name.label(class="form-label") }}
-            {{ form.name(class="form-control",value=name_to_update.name) }}
-            {{ form.email.label(class="form-label") }}
-            {{ form.email(class="form-control",value=name_to_update.email) }}
             {{ form.username.label(class="form-label") }}
-            {{ form.username(class="form-control",value=name_to_update.username) }}
+            {{ form.username(class="form-control") }}
+            <br/>
+
+            {{ form.password.label(class="form-label") }}
+            {{ form.password(class="form-control") }}
+
             <br/>
             {{ form.submit(class="btn btn-primary") }}
-            <a href="{{ url_for('delete_user',id=id)}}" class="btn btn-danger">Delete</a>
         </form>
-        
     </div>
-    
     <br/>
-    <br/>
+
     
-    
+
 {% endblock %}
