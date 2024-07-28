@@ -10,7 +10,7 @@ from datetime import datetime
 import psycopg2
 from sqlalchemy_utils import database_exists, create_database
 from werkzeug.security import generate_password_hash, check_password_hash
-
+from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
 
 
 
@@ -30,14 +30,18 @@ app.config['SECRET_KEY'] = config['DEFAULT']['SecretKey']
 db = SQLAlchemy(app)
 
 migrate = Migrate(app,db)
+#set up login manager
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
 
 
 # create the data model
-class Users(db.Model):
+class Users(db.Model, UserMixin):
     id = db.Column(db.Integer,primary_key=True)
+    username = db.Column(db.String(25),nullable=False, unique=True)
     name = db.Column(db.String(100),nullable=False)
     email = db.Column(db.String(100),nullable=False, unique=True)
-    favorite_color = db.Column(db.String(50))
     date_added = db.Column(db.DateTime, default=datetime.now())
     # password hash in db
     password_hash = db.Column(db.String(500))
@@ -69,6 +73,14 @@ class BlogPosts(db.Model):
      date_posted = db.Column(db.DateTime, default=datetime.now())
      slug = db.Column(db.String(250))
 
+# create a login Form
+class LoginForm(FlaskForm):
+    username = StringField("User Name", validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    submit = SubmitField("Submit")
+
+
+
 # create a BlogPosts Form
 
 class BlogPostsForm(FlaskForm):
@@ -84,9 +96,9 @@ class BlogPostsForm(FlaskForm):
 # Create a Form Class
 
 class UserForm(FlaskForm):
+    username = StringField("User Name", validators=[DataRequired()])
     name = StringField("Name", validators=[DataRequired()])
     email = StringField("Email Address", validators=[DataRequired()])
-    favorite_color = StringField("Favorite Color")
     password_hash = PasswordField('Password', validators=[DataRequired(),EqualTo('password_hash2',message='Passwords must match')])
     password_hash2 = PasswordField('Confirm Password', validators=[DataRequired()])
     submit = SubmitField("Submit")
@@ -118,6 +130,42 @@ def index():
                            stuff=stuff,
                            fav_piazza=fav_piazza)
 
+@login_manager.user_loader
+def load_user(user_id):
+    return Users.query.get(int(user_id))
+
+#create login fcn
+@app.route('/login',methods=['GET','POST'])
+def login_fcn():
+    form = LoginForm()
+
+    if form.validate_on_submit():
+        user = Users.query.filter_by(username=form.username.data).first()
+        # check if user password matches the hash in the db
+        if user:
+            if check_password_hash(user.password_hash, form.password.data):
+                login_user(user)
+                flash("Logged in successfully")
+                return redirect(url_for('dashboard'))
+            else:
+                flash("Wrong password - hermano. Try again")
+        else:
+            flash("User does/may not exist. Try again")
+    return render_template('login.html',form=form)
+
+#create dashboard fcn
+@app.route('/dashboard',methods=['GET','POST'])
+@login_required
+def dashboard():
+    return render_template('dashboard.html')
+
+@app.route('/logout',methods=['GET','POST'])
+@login_required
+def logout():
+    logout_user()
+    flash("You have been logged Out of here bro! Go and warm eba")
+    return redirect(url_for('login_fcn'))
+
 # localhost:5000/user/Chronus
 @app.route('/user/<name>')
 
@@ -136,13 +184,13 @@ def add_user():
         if user is None:
             # hash password before passing it to db
             hash_pw = generate_password_hash(form.password_hash.data, method='scrypt')
-            user = Users(name=form.name.data,email=form.email.data,favorite_color=form.favorite_color.data, password_hash=hash_pw)
+            user = Users(username=form.username.data,name=form.name.data,email=form.email.data, password_hash=hash_pw)
             db.session.add(user)
             db.session.commit()
         name = form.name.data
+        form.username.data = ''
         form.name.data = ''
         form.email.data = ''
-        form.favorite_color.data = ''
         form.password_hash = ''
         #create flash message
         flash("User added Successfully. Congrats")
@@ -152,7 +200,7 @@ def add_user():
                            name=name, 
                            list_users=list_users)
 
-# update a database record
+# update a database user record
 @app.route('/update/<int:id>', methods=['GET','POST'])
 
 def update_user(id):
