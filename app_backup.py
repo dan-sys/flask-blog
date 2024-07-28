@@ -1,4 +1,8 @@
 from flask import Flask, render_template, flash, request, redirect, url_for
+from flask_wtf import FlaskForm
+from wtforms import StringField, SubmitField, PasswordField, BooleanField, ValidationError
+from wtforms.validators import DataRequired, EqualTo, Length
+from wtforms.widgets import TextArea
 import configparser
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -7,8 +11,6 @@ import psycopg2
 from sqlalchemy_utils import database_exists, create_database
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
-from webforms import UserForm, LoginForm, BlogPostsForm, PasswordForm
-
 
 
 config = configparser.ConfigParser()
@@ -59,6 +61,7 @@ class Users(db.Model, UserMixin):
     def __repr__(self):
         return '<Name %r>' % self.name
 
+
 #create a blog post model
 class BlogPosts(db.Model):
      
@@ -69,6 +72,50 @@ class BlogPosts(db.Model):
      date_posted = db.Column(db.DateTime, default=datetime.now())
      slug = db.Column(db.String(250))
 
+# create a login Form
+class LoginForm(FlaskForm):
+    username = StringField("User Name", validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    submit = SubmitField("Submit")
+
+
+
+# create a BlogPosts Form
+
+class BlogPostsForm(FlaskForm):
+    title = StringField("Title", validators=[DataRequired()])
+    content = StringField("Content", validators=[DataRequired()], widget=TextArea())
+    author = StringField("Author", validators=[DataRequired()])
+    slug = StringField("Slug", validators=[DataRequired()])
+    submit = SubmitField("Submit")
+
+
+
+
+# Create a Form Class
+
+class UserForm(FlaskForm):
+    username = StringField("User Name", validators=[DataRequired()])
+    name = StringField("Name", validators=[DataRequired()])
+    email = StringField("Email Address", validators=[DataRequired()])
+    password_hash = PasswordField('Password', validators=[DataRequired(),EqualTo('password_hash2',message='Passwords must match')])
+    password_hash2 = PasswordField('Confirm Password', validators=[DataRequired()])
+    submit = SubmitField("Submit")
+
+
+
+class PasswordForm(FlaskForm):
+
+    email = StringField("Email Address", validators=[DataRequired()])
+    password_hash = PasswordField('Enter your Password', validators=[DataRequired()])
+
+    submit = SubmitField("Submit")
+
+class UserUpdateForm(FlaskForm):
+    previous_name = StringField("Previous Name", validators=[DataRequired()])
+    new_name = StringField("New Name", validators=[DataRequired()])
+    #email = StringField("Email Address", validators=[DataRequired()])
+    submit = SubmitField("Submit")
 
 #create a route decorator
 @app.route('/')
@@ -146,6 +193,12 @@ def logout():
     logout_user()
     flash("You have been logged Out of here bro! Go and warm eba")
     return redirect(url_for('login_fcn'))
+
+# localhost:5000/user/Chronus
+@app.route('/user/<name>')
+
+def user(name):
+    return render_template("user.html",user_name=name)
 
 
 @app.route('/user/add',methods=['GET','POST'])
@@ -348,6 +401,26 @@ def delete_post(id):
 #    return {"id": 568459,
 #            "user": "User Primo",
 #            }
+
+
+#create namepage
+#this is to be deleted later
+@app.route('/name',methods=['GET','POST'])
+
+def name():
+
+    name = None
+    form = UserForm()
+    # validate form
+    if form.validate_on_submit():
+        name = form.name.data
+        form.name.data = ''
+        #create flash message
+        flash("Form submitted Successfully. Congrats")
+
+    return render_template("name.html",
+                           name=name,
+                           form=form)
 
 
 # create custom error pages
