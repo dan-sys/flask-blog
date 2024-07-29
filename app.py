@@ -327,21 +327,25 @@ def edit_post(id):
 @login_required
 def delete_post(id):
     post_to_delete = BlogPosts.query.get_or_404(id)
-
-    try:
-        db.session.delete(post_to_delete)
-        db.session.commit()
-        flash("Blog Post deleted successfully")
+    id = current_user.id
+    if id == post_to_delete.poster_info.id:
+        try:
+            db.session.delete(post_to_delete)
+            db.session.commit()
+            flash("Blog Post deleted successfully")
+            posts = BlogPosts.query.order_by(BlogPosts.date_posted)
+            return render_template("posts.html",
+                            posts=posts)
+        except:
+            flash("Problem occured when deleting Blog Post")
+            posts = BlogPosts.query.order_by(BlogPosts.date_posted)
+            return render_template("posts.html",
+                            posts=posts)
+    else:
+        flash("You cannot delete someone else's Blog Post")
         posts = BlogPosts.query.order_by(BlogPosts.date_posted)
         return render_template("posts.html",
-                           posts=posts)
-    except:
-        flash("Problem occured when deleting Blog Post")
-        posts = BlogPosts.query.order_by(BlogPosts.date_posted)
-        return render_template("posts.html",
-                           posts=posts)
-
-
+                            posts=posts)
 
 # to return JSON
 #@app.route('/api')
