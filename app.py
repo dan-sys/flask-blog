@@ -7,7 +7,7 @@ import psycopg2
 from sqlalchemy_utils import database_exists, create_database
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
-from webforms import UserForm, LoginForm, BlogPostsForm, PasswordForm
+from webforms import UserForm, LoginForm, BlogPostsForm, PasswordForm, SearchForm
 
 
 
@@ -352,6 +352,30 @@ def delete_post(id):
         posts = BlogPosts.query.order_by(BlogPosts.date_posted)
         return render_template("posts.html",
                             posts=posts)
+
+
+# pass data to Navbar
+@app.context_processor
+def base_html():
+    form = SearchForm()
+    return dict(form=form)
+
+
+# search functionality
+@app.route('/search', methods=['POST'])
+
+def search_posts():
+    form = SearchForm()
+    posts_found = BlogPosts.query
+    if form.validate_on_submit():
+        post_searchterm = form.search_term.data
+        posts_found = posts_found.filter(BlogPosts.content.like('%' + post_searchterm + '%'))
+        posts_found = posts_found.order_by(BlogPosts.title).all()
+
+        return render_template("search_posts.html",
+                               form=form,
+                               search_term=post_searchterm, 
+                               posts_found=posts_found)
 
 # to return JSON
 #@app.route('/api')
