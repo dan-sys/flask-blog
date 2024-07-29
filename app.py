@@ -8,7 +8,7 @@ from sqlalchemy_utils import database_exists, create_database
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
 from webforms import UserForm, LoginForm, BlogPostsForm, PasswordForm, SearchForm
-
+from flask_ckeditor import CKEditor
 
 
 config = configparser.ConfigParser()
@@ -16,7 +16,8 @@ config.read('secretKey.ini')
 
 #create flask app instance
 app = Flask(__name__)
-
+#add ckeditor
+ckeditor = CKEditor(app)
 # add Database
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db' 
 app.config['SQLALCHEMY_DATABASE_URI'] = config['DEFAULT']['DB_URL']
