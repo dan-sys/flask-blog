@@ -42,6 +42,8 @@ class Users(db.Model, UserMixin):
     date_added = db.Column(db.DateTime, default=datetime.now())
     # password hash in db
     password_hash = db.Column(db.String(500))
+    # user can have many posts
+    posts = db.relationship('BlogPosts', backref='poster_info')
     #create a property for the passwords
     @property
     def user_password(self):
@@ -65,9 +67,11 @@ class BlogPosts(db.Model):
      id = db.Column(db.Integer,primary_key=True)
      title = db.Column(db.String(250))
      content = db.Column(db.Text)
-     author = db.Column(db.String(250))
+     #author = db.Column(db.String(250))
      date_posted = db.Column(db.DateTime, default=datetime.now())
      slug = db.Column(db.String(250))
+     #create a foreign key to link to users db
+     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
 
 #create a route decorator
@@ -268,10 +272,10 @@ def add_post():
     form = BlogPostsForm()
 
     if form.validate_on_submit():
-        post = BlogPosts(title=form.title.data, content=form.content.data, author=form.author.data, slug=form.slug.data)
+        poster = current_user.id
+        post = BlogPosts(title=form.title.data, content=form.content.data, author_id=poster, slug=form.slug.data)
         form.title.data = ''
         form.content.data = ''
-        form.author.data = ''
         form.slug.data = ''
 
         #add data to database table
@@ -304,7 +308,6 @@ def edit_post(id):
 
     if form.validate_on_submit():
         post_to_edit.title = form.title.data
-        post_to_edit.author = form.author.data
         post_to_edit.slug = form.slug.data
         post_to_edit.content = form.content.data
 
@@ -315,7 +318,6 @@ def edit_post(id):
         return redirect(url_for('show_single_post',id=post_to_edit.id))
 
     form.title.data = post_to_edit.title
-    form.author.data = post_to_edit.author
     form.slug.data = post_to_edit.slug
     form.content.data = post_to_edit.content
     return render_template('edit_post.html',form=form)
