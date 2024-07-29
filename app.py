@@ -354,10 +354,10 @@ def delete_post(id):
                             posts=posts)
 
 
-# pass data to NAvbar
+# pass data to Navbar
 @app.context_processor
 def base_html():
-    form = SearchForm
+    form = SearchForm()
     return dict(form=form)
 
 
@@ -366,10 +366,16 @@ def base_html():
 
 def search_posts():
     form = SearchForm()
-
+    posts_found = BlogPosts.query
     if form.validate_on_submit():
-        post.search_term = form.search_term.data
-        return render_template("search_posts.html",form=form,search_term=post.search_term)
+        post_searchterm = form.search_term.data
+        posts_found = posts_found.filter(BlogPosts.content.like('%' + post_searchterm + '%'))
+        posts_found = posts_found.order_by(BlogPosts.title).all()
+
+        return render_template("search_posts.html",
+                               form=form,
+                               search_term=post_searchterm, 
+                               posts_found=posts_found)
 
 # to return JSON
 #@app.route('/api')
