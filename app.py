@@ -317,11 +317,17 @@ def edit_post(id):
         flash("Post has been updated")
         return redirect(url_for('show_single_post',id=post_to_edit.id))
 
-    form.title.data = post_to_edit.title
-    form.slug.data = post_to_edit.slug
-    form.content.data = post_to_edit.content
-    return render_template('edit_post.html',form=form)
-
+    if current_user.id == post_to_edit.poster_info.id:
+        form.title.data = post_to_edit.title
+        form.slug.data = post_to_edit.slug
+        form.content.data = post_to_edit.content
+        return render_template('edit_post.html',form=form)
+    else:
+        flash("You are not able to edit this Post, as you didnt create it.")
+        posts = BlogPosts.query.order_by(BlogPosts.date_posted)
+        return render_template("posts.html",
+                           posts=posts)
+    
 
 @app.route('/posts/delete/<int:id>')
 @login_required
