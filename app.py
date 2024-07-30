@@ -233,6 +233,16 @@ def delete_user(id):
                                name=name,
                                list_users=list_users)
 
+@app.route('/admin')
+@login_required
+def admin_page():
+    id = current_user.id
+
+    if id == 14:
+         return render_template("admin.html")
+    else:
+        flash("Sorry you must be designated admin to access Admin area")
+        return redirect(url_for('dashboard'))
 
 @app.route('/test_pw',methods=['GET','POST'])
 
