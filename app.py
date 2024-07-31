@@ -40,6 +40,7 @@ class Users(db.Model, UserMixin):
     username = db.Column(db.String(25),nullable=False, unique=True)
     name = db.Column(db.String(100),nullable=False)
     email = db.Column(db.String(100),nullable=False, unique=True)
+    about_author = db.Column(db.Text,nullable=True)
     date_added = db.Column(db.DateTime, default=datetime.now())
     # password hash in db
     password_hash = db.Column(db.String(500))
@@ -124,6 +125,7 @@ def dashboard():
         name_to_update.name = request.form['name']
         name_to_update.email = request.form['email']
         name_to_update.username = request.form['username']
+        name_to_update.about_author = request.form['about_author']
         try:
             db.session.commit()
             flash("User information updated successfully!!!")
@@ -164,13 +166,14 @@ def add_user():
         if user is None:
             # hash password before passing it to db
             hash_pw = generate_password_hash(form.password_hash.data, method='scrypt')
-            user = Users(username=form.username.data,name=form.name.data,email=form.email.data, password_hash=hash_pw)
+            user = Users(username=form.username.data,name=form.name.data,email=form.email.data, about_author=form.about_author.data,password_hash=hash_pw)
             db.session.add(user)
             db.session.commit()
         name = form.name.data
         form.username.data = ''
         form.name.data = ''
         form.email.data = ''
+        form.about_author.data=''
         form.password_hash = ''
         #create flash message
         flash("User added Successfully. Congrats")
@@ -191,6 +194,7 @@ def update_user(id):
         name_to_update.name = request.form['name']
         name_to_update.email = request.form['email']
         name_to_update.username = request.form['username']
+        name_to_update.about_author = request.form['about_author']
         try:
             db.session.commit()
             flash("User information updated successfully!!!")
