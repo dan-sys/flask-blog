@@ -145,6 +145,28 @@ def dashboard():
                                    name_to_update=name_to_update,
                                    id=id)
 
+# visit author dashboard
+@app.route('/dashboard_author/<username>',methods=['GET','POST'])
+@login_required
+def dashboard_author(username):
+    name_to_find = Users.query.filter_by(username=username).first_or_404()
+
+    if name_to_find :
+        #get posts with the user id
+        auth_id = name_to_find.id
+        posts_found = BlogPosts.query.filter_by(author_id=auth_id)
+        posts_found = posts_found.order_by(BlogPosts.date_posted.desc())
+        return render_template("dashboard_author.html",
+                                   name_to_find=name_to_find,
+                                   username=username,
+                                   posts_found=posts_found)
+    else:
+        flash("Profile seems to be missing. Sorry")
+        posts = BlogPosts.query.order_by(BlogPosts.date_posted.desc())
+        return render_template("posts.html",
+                           posts=posts)
+
+
 
 @app.route('/logout',methods=['GET','POST'])
 @login_required
@@ -278,7 +300,7 @@ def add_post():
 def show_posts():
     # query db to get blog posts from Database table
     #we are quering the model -- note this
-    posts = BlogPosts.query.order_by(BlogPosts.date_posted)
+    posts = BlogPosts.query.order_by(BlogPosts.date_posted.desc())
     return render_template("posts.html",
                            posts=posts)
 
