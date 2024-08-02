@@ -215,27 +215,31 @@ def update_user(id):
                                    id=id)
     
 @app.route('/delete/<int:id>')
-
+@login_required
 def delete_user(id):
-    user_to_delete = Users.query.get_or_404(id)
-    name = None
-    form = UserForm()
-    try:
-        db.session.delete(user_to_delete)
-        db.session.commit()
-        flash("User Deleted Successfully")
+    if id == current_user.id:
+        user_to_delete = Users.query.get_or_404(id)
+        name = None
+        form = UserForm()
+        try:
+            db.session.delete(user_to_delete)
+            db.session.commit()
+            flash("User Deleted Successfully")
 
-        list_users = Users.query.order_by(Users.date_added)
-        return render_template("add_user.html",
-                               form=form,
-                               name=name,
-                               list_users=list_users)
-    except:
-        flash("Wooah User refused to be deleted Successfully")
-        return render_template("add_user.html",
-                               form=form,
-                               name=name,
-                               list_users=list_users)
+            list_users = Users.query.order_by(Users.date_added)
+            return render_template("add_user.html",
+                                form=form,
+                                name=name,
+                                list_users=list_users)
+        except:
+            flash("Wooah User refused to be deleted Successfully")
+            return render_template("add_user.html",
+                                form=form,
+                                name=name,
+                                list_users=list_users)
+    else:
+        flash("You don't have the permissions to peform this action")
+        return redirect(url_for('dashboard'))
 
 @app.route('/admin')
 @login_required
