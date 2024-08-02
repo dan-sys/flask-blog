@@ -16,7 +16,8 @@
 <div class="card" style="width: auto;">
     <div class="card-body">
       <h5 class="card-title"><a href="{{ url_for('show_single_post',id=post.id) }}"> {{ post.title }}  </a> </h5>
-      <h6 class="card-subtitle mb-2 text-body-secondary"> Author : {{ post.poster_info.name }} </h6>
+      <!-- <h6 class="card-subtitle mb-2 text-body-secondary"> Author : <a href="#"> {{ post.poster_info.name }} </a>  </h6> -->
+      <h6 class="card-subtitle mb-2 text-body-secondary"> username : <a href="{{ url_for('dashboard_author',username=post.poster_info.username) }}"> {{ post.poster_info.username }} </a>  </h6>
 
       {% if post.poster_info.about_author %}
         <h6 class="card-subtitle mb-2 text-body-secondary"> About Author : {{ post.poster_info.about_author }} </h6>

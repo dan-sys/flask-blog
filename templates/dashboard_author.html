@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% for message in get_flashed_messages() %}
+
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ message }}
+    <!--  <span type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></span> -->
+    <span type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></span>
+    </div>
+    
+{% endfor %}
+
+    <h3>User {{ name_to_find.username }} </h3>
+    <br/>
+    <div class="card">
+        <h5 class="card-header">User Dashboard</h5>
+        <div class="card-body">
+          <p class="card-text">
+            <div class="container">
+              <div class="row">
+                <div class="col-8">
+                  <strong>Name :</strong> {{ name_to_find.name }} <br/>
+                  <strong>Username :</strong>  {{ name_to_find.username }} <br/>
+                  <strong>UserId :</strong>  {{ name_to_find.id }} <br/>
+                  <strong>Email Address :</strong>  {{ name_to_find.email }} <br/>
+                  <strong>Date Joined :</strong>   {{ name_to_find.date_added }} <br/>
+                  <strong>About Author :</strong>   {{ name_to_find.about_author }} <br/>
+                </div>
+                
+
+                <div class="col-4"> <img src="{{ url_for('static',filename='images/default_profile_pic.png') }}" width="150" style="float:right">
+                </div>
+              </div>
+            </div>
+          </p>
+          
+        </div>
+    </div>
+    <br/>
+
+    <h3>Previous blogposts </h3>
+    <br/>
+    {% for post in posts_found %}
+    <div class="card" style="width: auto;">
+    <div class="card-body">
+      <h5 class="card-title"><a href="{{ url_for('show_single_post',id=post.id) }}"> {{ post.title }}  </a> </h5>
+      <h6 class="card-subtitle mb-2 text-body-secondary"> username : {{ post.poster_info.username }} </h6>
+      <p class="card-subtitle mb-2 text-body-secondary"> Date added : {{ post.date_posted }}  </p>
+      <p class="card-text"> {{ post.content|safe }} </p>
+
+      <br/>
+
+      <a href="{{ url_for('show_single_post',id=post.id) }}" class="btn btn-outline-secondary btn-sm"> View Post </a>
+    
+    </div>
+    
+    </div>   
+    <br/>
+     
+{% endfor %}
+
+{% endblock %}
