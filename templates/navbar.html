@@ -8,11 +8,13 @@
     <ul class="navbar-nav mr-auto">
 
       {% if current_user.is_authenticated %}
+      
         {% if current_user.id == 14 %}
           <li class="nav-item active">
             <a class="nav-link" href="{{ url_for('admin_page') }}">Admin<span class="sr-only">(current)</span></a>
           </li>
         {% endif %}
+
         <li class="nav-item active">
           <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard<span class="sr-only">(current)</span></a>
         </li>

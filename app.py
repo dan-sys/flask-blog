@@ -252,37 +252,6 @@ def admin_page():
         flash("Sorry you must be designated admin to access Admin area")
         return redirect(url_for('dashboard'))
 
-@app.route('/test_pw',methods=['GET','POST'])
-
-def test_pw():
-
-    email = None
-    password = None
-    pw_to_check = None
-    passed = None
-    form = PasswordForm()
-
-    # validate form
-    if form.validate_on_submit():
-        email = form.email.data
-        password= form.password_hash.data
-        #clear the form
-        form.email.data = ''
-        form.password_hash = ''
-
-        #look up users by email address
-        pw_to_check = Users.query.filter_by(email=email).first()
-
-        #check hashed passwords
-        passed = check_password_hash(pw_to_check.password_hash, password)
-
-
-    return render_template("test_pw.html",
-                           email=email,
-                           password=password,
-                           pw_to_check=pw_to_check,
-                           passed=passed,
-                           form=form)
 
 # Add a blogpost page
 @app.route('/add-post',methods=['GET','POST'])
@@ -396,15 +365,6 @@ def search_posts():
                                search_term=post_searchterm, 
                                posts_found=posts_found)
 
-# to return JSON
-#@app.route('/api')
-#def get_sampleJSON():
-#    #just prepare a dictionary and flask will jsonify it
-#    return {"id": 568459,
-#            "user": "User Primo",
-#            }
-
-
 # create custom error pages
 
 #invalid url 
@@ -428,6 +388,50 @@ def createdb_command():
     print('Creating tables.')
     db.create_all()
     print('Tables created!')
+
+
+
+
+# to return JSON
+#@app.route('/api')
+#def get_sampleJSON():
+#    #just prepare a dictionary and flask will jsonify it
+#    return {"id": 568459,
+#            "user": "User Primo",
+#            }
+
+#@app.route('/test_pw',methods=['GET','POST'])
+#def test_pw():
+#
+#    email = None
+#    password = None
+#    pw_to_check = None
+#    passed = None
+#    form = PasswordForm()
+#
+#    # validate form
+#    if form.validate_on_submit():
+#        email = form.email.data
+#        password= form.password_hash.data
+#        #clear the form
+#        form.email.data = ''
+#        form.password_hash = ''
+#
+#        #look up users by email address
+#        pw_to_check = Users.query.filter_by(email=email).first()
+#
+#        #check hashed passwords
+#        passed = check_password_hash(pw_to_check.password_hash, password)
+#
+#
+#    return render_template("test_pw.html",
+#                           email=email,
+#                           password=password,
+#                           pw_to_check=pw_to_check,
+#                           passed=passed,
+#                           form=form)
+
+
 
 
 
