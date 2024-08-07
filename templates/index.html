@@ -1,24 +1,48 @@
-
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>Hello Worm</h1>
+{% for message in get_flashed_messages() %}
+
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ message }}
+    <span type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></span>
+    </div>
     
+{% endfor %}
+<h1>Blog Posts</h1>
+<br/>
+
+{% for post in posts %}
+<div class="card" style="width: auto;">
+    <div class="card-body">
+      <h5 class="card-title"><a href="{{ url_for('show_single_post',id=post.id) }}"> {{ post.title }}  </a> </h5>
+      <!-- <h6 class="card-subtitle mb-2 text-body-secondary"> Author : <a href="#"> {{ post.poster_info.name }} </a>  </h6> -->
+      <h6 class="card-subtitle mb-2 text-body-secondary"> username : <a href="{{ url_for('dashboard_author',username=post.poster_info.username) }}"> {{ post.poster_info.username }} </a>  </h6>
+
+      {% if post.poster_info.about_author %}
+        <h6 class="card-subtitle mb-2 text-body-secondary"> About Author : {{ post.poster_info.about_author }} </h6>
+      {% endif %}
+
+      <p class="card-subtitle mb-2 text-body-secondary"> Date added : {{ post.date_posted }}  </p>
+      <p class="card-text"> {{ post.content|safe }} </p>
+
+      <br/>
+
+      <a href="{{ url_for('show_single_post',id=post.id) }}" class="btn btn-outline-secondary btn-sm"> View Post </a>
+
+    {% if post.poster_info.id == current_user.id %}
+      <a href="{{ url_for('edit_post',id=post.id) }}" class="btn btn-outline-secondary btn-sm"> Edit Post </a>
+      <a href="{{ url_for('delete_post',id=post.id) }}" class="btn btn-outline-danger btn-sm"> Delete Post </a>
+    {% endif %}
     
+    </div>
     
-    <p>Start of something</p>
-    <p>My name is {{ first_name }}</p>
-    <p>{{ stuff|striptags }}</p>
-    
-    <h3> Favorite Piazza : </h3>
-    
-    {% for topping in fav_piazza %}
-        {% if topping is string  %}
-            {{ topping }}<br/>
-        {% endif %}
-    {% endfor %}
-    
-    <br><br/>
-    {{ fav_piazza.3+95 }}
+</div>   
+    <br/>
+     
+{% endfor %}
+   
+
+
 
 {% endblock %}
